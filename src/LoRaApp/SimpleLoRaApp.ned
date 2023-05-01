@@ -36,6 +36,7 @@ simple SimpleLoRaApp like IApp
         bool initialUseHeader = default(true);
         bool evaluateADRinNode = default(false);
         int dataSize @unit(B) = default(10B);
+        string deviceProtocolType = default("legacy");
     gates:
         input socketIn @labels(LoRaAppPacket/up);
         output socketOut @labels(LoRaAppPacket/down);        

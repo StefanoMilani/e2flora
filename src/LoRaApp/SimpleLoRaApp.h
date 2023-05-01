@@ -87,6 +87,9 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle {
   bool sendNextPacketWithADRACKReq = false;
   void increaseSFIfPossible();
 
+  // Legacy Device
+  const char* deviceProtocolType;
+
  public:
   SimpleLoRaApp() {}
   simsignal_t LoRa_AppPacketSent;

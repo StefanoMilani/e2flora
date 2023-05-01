@@ -54,8 +54,17 @@ void SimpleLoRaApp::initialize(int stage) {
     } while (timeToFirstPacket <= 5);
 
     // timeToFirstPacket = par("timeToFirstPacket");
-    sendMeasurements = new cMessage("sendMeasurements");
-    scheduleAt(simTime() + timeToFirstPacket, sendMeasurements);
+
+    // Legacy Device Flag
+    deviceProtocolType = par("deviceProtocolType");
+    if (strcmp(deviceProtocolType, "edge") == 0) {
+      sendMeasurementsEdge = new cMessage("sendMeasurementsEdge");
+      scheduleAt(simTime() + timeToFirstPacket, sendMeasurementsEdge);
+    } else {
+      // If ProtocolType is hybrid then start with legacy frame
+      sendMeasurements = new cMessage("sendMeasurements");
+      scheduleAt(simTime() + timeToFirstPacket, sendMeasurements);
+    }
 
     sentPackets = 0;
     receivedADRCommands = 0;
@@ -120,16 +129,15 @@ void SimpleLoRaApp::finish() {
 void SimpleLoRaApp::handleMessage(cMessage* msg) {
   if (msg->isSelfMessage()) {
     if (msg == sendMeasurements || msg == sendMeasurementsEdge) {
-      bool edgeMsg;
+      bool edgeFrame;
       if (strcmp(msg->getFullName(), "sendMeasurementsEdge") == 0) {
-        EV << "###### Sending an EDGE Data Frame Message" << endl;
         sendJoinRequest((char*)"EdgeDataFrame");
-        edgeMsg = true;
+        edgeFrame = true;
       } else {
-        EV << "###### Sending a Data Frame Message" << endl;
         sendJoinRequest((char*)"DataFrame");
-        edgeMsg = false;
+        edgeFrame = false;
       }
+
       if (simTime() >= getSimulation()->getWarmupPeriod())
         sentPackets++;
       delete msg;
@@ -153,12 +161,22 @@ void SimpleLoRaApp::handleMessage(cMessage* msg) {
           // if(timeToNextPacket < 3) error("Time to next packet must be grater
           // than 3");
         } while (timeToNextPacket <= time);
-        if (edgeMsg) {
+
+        // Check next frame to send
+        if (strcmp(deviceProtocolType, "legacy") == 0) {
           sendMeasurements = new cMessage("sendMeasurements");
           scheduleAt(simTime() + timeToNextPacket, sendMeasurements);
-        } else {
+        } else if (strcmp(deviceProtocolType, "edge") == 0) {
           sendMeasurementsEdge = new cMessage("sendMeasurementsEdge");
           scheduleAt(simTime() + timeToNextPacket, sendMeasurementsEdge);
+        } else if (strcmp(deviceProtocolType, "hybrid") == 0) {
+          if (edgeFrame) {
+            sendMeasurements = new cMessage("sendMeasurements");
+            scheduleAt(simTime() + timeToNextPacket, sendMeasurements);
+          } else {
+            sendMeasurementsEdge = new cMessage("sendMeasurementsEdge");
+            scheduleAt(simTime() + timeToNextPacket, sendMeasurementsEdge);
+          }
         }
       }
     }
