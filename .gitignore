@@ -35,3 +35,6 @@ simulations/**/.qtenvrc
 simulations/**/.cmdenv-log
 simulations/**/valgrind.out
 simulations/**/log.txt
+
+# VS CODE
+.vscode
