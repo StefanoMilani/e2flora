@@ -93,6 +93,8 @@ class SimpleLoRaApp : public cSimpleModule, public ILifecycle {
  public:
   SimpleLoRaApp() {}
   simsignal_t LoRa_AppPacketSent;
+  simsignal_t LoRa_DataFrameSent;
+  simsignal_t LoRa_EdgeDataFrameSent;
 };
 
 }  // namespace flora

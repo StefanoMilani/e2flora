@@ -93,6 +93,7 @@ void PacketForwarder::handleMessage(cMessage* msg) {
         const auto& frame = pkt->peekAtFront<LoRaMacFrame>();
         processLoraMACPacket(pkt);
       }
+      delete msg;
       return;
     }
     EV << "Received a DataFrame... Forwarding it to NS" << endl;

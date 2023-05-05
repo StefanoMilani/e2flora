@@ -24,7 +24,12 @@ simple SimpleLoRaApp like IApp
 {
     parameters:
         @signal[LoRa_AppPacketSent](type=long); // optional
+        @signal[LoRa_DataFrameSent](type=long); // optional
+        @signal[Lora_EdgeDataFrameSent](type=long); // optional
         @statistic[LoRa_AppPacketSent](source=LoRa_AppPacketSent; record=count);
+        @statistic[LoRa_DataFrameSent](source=LoRa_DataFrameSent; record=count);
+        @statistic[Lora_EdgeDataFrameSent](source=Lora_EdgeDataFrameSent; record=count);
+        @display("i=block/routing");
         int numberOfPacketsToSend = default(1);
         volatile double timeToFirstPacket @unit(s) = default(10s);
         volatile double timeToNextPacket @unit(s) = default(10s);

@@ -57,11 +57,14 @@ void SimpleLoRaApp::initialize(int stage) {
 
     // Legacy Device Flag
     deviceProtocolType = par("deviceProtocolType");
+    EV << "####################### HEREEEEEEEEEEEEEE" << deviceProtocolType
+       << endl;
     if (strcmp(deviceProtocolType, "edge") == 0) {
       sendMeasurementsEdge = new cMessage("sendMeasurementsEdge");
       scheduleAt(simTime() + timeToFirstPacket, sendMeasurementsEdge);
     } else {
       // If ProtocolType is hybrid then start with legacy frame
+      EV << "##################### Sending Data Frame" << endl;
       sendMeasurements = new cMessage("sendMeasurements");
       scheduleAt(simTime() + timeToFirstPacket, sendMeasurements);
     }
@@ -71,6 +74,8 @@ void SimpleLoRaApp::initialize(int stage) {
     numberOfPacketsToSend = par("numberOfPacketsToSend");
 
     LoRa_AppPacketSent = registerSignal("LoRa_AppPacketSent");
+    LoRa_DataFrameSent = registerSignal("LoRa_DataFrameSent");
+    LoRa_EdgeDataFrameSent = registerSignal("LoRa_EdgeDataFrameSent");
 
     // LoRa physical layer parameters
     loRaRadio = check_and_cast<LoRaRadio*>(
@@ -127,13 +132,17 @@ void SimpleLoRaApp::finish() {
 }
 
 void SimpleLoRaApp::handleMessage(cMessage* msg) {
+  EV << "##### #### #### Handle Message" << endl;
   if (msg->isSelfMessage()) {
     if (msg == sendMeasurements || msg == sendMeasurementsEdge) {
+      EV << "##### #### ####Sending Measurements" << endl;
       bool edgeFrame;
       if (strcmp(msg->getFullName(), "sendMeasurementsEdge") == 0) {
         sendJoinRequest((char*)"EdgeDataFrame");
         edgeFrame = true;
       } else {
+        // Legacy frame
+        EV << "##### #### ####Sending DataFrame" << endl;
         sendJoinRequest((char*)"DataFrame");
         edgeFrame = false;
       }
@@ -220,6 +229,8 @@ bool SimpleLoRaApp::handleOperationStage(LifecycleOperation* operation,
 }
 
 void SimpleLoRaApp::sendJoinRequest(char* msgType) {
+  EV << "#########################################################" << endl;
+  EV << "Starting send join request" << endl;
   auto pktRequest = new Packet(msgType);
   pktRequest->setKind(DATA);
 
@@ -268,7 +279,17 @@ void SimpleLoRaApp::sendJoinRequest(char* msgType) {
       increaseSFIfPossible();
     }
   }
+  EV << "#########################################################" << endl;
+  EV << "##### Message Sent: " << msgType << endl;
   emit(LoRa_AppPacketSent, getSF());
+  if (strcmp(msgType, "EdgeDataFrame") == 0) {
+    EV << "################ DAJE DE EDGE" << endl;
+    emit(LoRa_EdgeDataFrameSent, getSF());
+  }
+  if (strcmp(msgType, "DataFrame") == 0) {
+    EV << "################ DAJE DE DATA" << endl;
+    emit(LoRa_DataFrameSent, getSF());
+  }
 }
 
 void SimpleLoRaApp::increaseSFIfPossible() {
