@@ -31,6 +31,8 @@ void PacketForwarder::initialize(int stage) {
     LoRa_GWPacketReceived = registerSignal("LoRa_GWPacketReceived");
     localPort = par("localPort");
     destPort = par("destPort");
+    // Legacy Settings
+    gwProtocolType = par("gwProtocolType");
   } else if (stage == INITSTAGE_APPLICATION_LAYER) {
     startUDP();
     getSimulation()->getSystemModule()->subscribe("LoRa_AppPacketSent", this);
@@ -73,7 +75,11 @@ void PacketForwarder::handleMessage(cMessage* msg) {
   if (msg->arrivedOn("lowerLayerIn")) {
     EV << "Received LoRaMAC frame" << endl;
     const char* lorawanMsgType = msg->getFullName();
-    if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
+    /*
+     *  Check if GW is legacy and the msg type received
+     */
+    if (strcmp(gwProtocolType, "edge") == 0 &&
+        strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
       EV << "Received an EdgeDataFrame... Doing Nothing" << endl;
       return;
     }
