@@ -81,9 +81,21 @@ void PacketForwarder::handleMessage(cMessage* msg) {
     if (strcmp(gwProtocolType, "edge") == 0 &&
         strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
       EV << "Received an EdgeDataFrame... Doing Nothing" << endl;
+      if (++counterOfEdgeDataFrameReceived % 2 == 0) {
+        cMessage* aggrMessage = msg->dup();
+        aggrMessage->setName("AggregateEdgeDataFrame");
+        EV << "################# Aggregate EdgeDataFrame... Sending it to AS"
+           << endl;
+
+        // send(aggrMessage, "socketOut");
+
+        auto pkt = check_and_cast<Packet*>(aggrMessage);
+        const auto& frame = pkt->peekAtFront<LoRaMacFrame>();
+        processLoraMACPacket(pkt);
+      }
       return;
     }
-    EV << "Received an DataFrame... Forwarding it to NS" << endl;
+    EV << "Received a DataFrame... Forwarding it to NS" << endl;
     auto pkt = check_and_cast<Packet*>(msg);
     const auto& frame = pkt->peekAtFront<LoRaMacFrame>();
     if (frame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS)

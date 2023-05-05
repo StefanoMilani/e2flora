@@ -36,7 +36,7 @@ class PacketForwarder : public cSimpleModule, public cListener {
   UdpSocket socket;
   cMessage* selfMsg = nullptr;
 
-  // Legacy device
+  // Edge Support
   const char* gwProtocolType;
 
  protected:
@@ -57,6 +57,9 @@ class PacketForwarder : public cSimpleModule, public cListener {
   simsignal_t LoRa_GWPacketReceived;
   int counterOfSentPacketsFromNodes = 0;
   int counterOfReceivedPackets = 0;
+
+  // Edge Support
+  int counterOfEdgeDataFrameReceived = 0;
 };
 }  // namespace flora
 #endif
