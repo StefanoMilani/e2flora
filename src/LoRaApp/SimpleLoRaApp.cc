@@ -57,14 +57,11 @@ void SimpleLoRaApp::initialize(int stage) {
 
     // Legacy Device Flag
     deviceProtocolType = par("deviceProtocolType");
-    EV << "####################### HEREEEEEEEEEEEEEE" << deviceProtocolType
-       << endl;
     if (strcmp(deviceProtocolType, "edge") == 0) {
       sendMeasurementsEdge = new cMessage("sendMeasurementsEdge");
       scheduleAt(simTime() + timeToFirstPacket, sendMeasurementsEdge);
     } else {
       // If ProtocolType is hybrid then start with legacy frame
-      EV << "##################### Sending Data Frame" << endl;
       sendMeasurements = new cMessage("sendMeasurements");
       scheduleAt(simTime() + timeToFirstPacket, sendMeasurements);
     }
@@ -132,17 +129,14 @@ void SimpleLoRaApp::finish() {
 }
 
 void SimpleLoRaApp::handleMessage(cMessage* msg) {
-  EV << "##### #### #### Handle Message" << endl;
   if (msg->isSelfMessage()) {
     if (msg == sendMeasurements || msg == sendMeasurementsEdge) {
-      EV << "##### #### ####Sending Measurements" << endl;
       bool edgeFrame;
       if (strcmp(msg->getFullName(), "sendMeasurementsEdge") == 0) {
         sendJoinRequest((char*)"EdgeDataFrame");
         edgeFrame = true;
       } else {
         // Legacy frame
-        EV << "##### #### ####Sending DataFrame" << endl;
         sendJoinRequest((char*)"DataFrame");
         edgeFrame = false;
       }
@@ -229,8 +223,6 @@ bool SimpleLoRaApp::handleOperationStage(LifecycleOperation* operation,
 }
 
 void SimpleLoRaApp::sendJoinRequest(char* msgType) {
-  EV << "#########################################################" << endl;
-  EV << "Starting send join request" << endl;
   auto pktRequest = new Packet(msgType);
   pktRequest->setKind(DATA);
 
@@ -279,16 +271,15 @@ void SimpleLoRaApp::sendJoinRequest(char* msgType) {
       increaseSFIfPossible();
     }
   }
-  EV << "#########################################################" << endl;
-  EV << "##### Message Sent: " << msgType << endl;
   emit(LoRa_AppPacketSent, getSF());
+  EV << "######################## msgType: " << msgType << endl;
   if (strcmp(msgType, "EdgeDataFrame") == 0) {
-    EV << "################ DAJE DE EDGE" << endl;
-    emit(LoRa_EdgeDataFrameSent, getSF());
+    EV << "EDGE MESSAGE!!!!" << endl;
+    emit(LoRa_EdgeDataFrameSent, true);
+    EV << "LoRa_EdgeDataFrameSent signal emitted" << endl;
   }
   if (strcmp(msgType, "DataFrame") == 0) {
-    EV << "################ DAJE DE DATA" << endl;
-    emit(LoRa_DataFrameSent, getSF());
+    emit(LoRa_DataFrameSent, true);
   }
 }
 

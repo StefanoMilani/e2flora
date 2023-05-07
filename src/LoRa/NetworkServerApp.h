@@ -103,6 +103,8 @@ class NetworkServerApp : public cSimpleModule, cListener {
 
  public:
   simsignal_t LoRa_ServerPacketReceived;
+  simsignal_t LoRa_ServerDataFrameReceived;
+  simsignal_t LoRa_ServerAggregateDataFrameReceived;
   int counterOfSentPacketsFromNodes = 0;
   int counterOfSentPacketsFromNodesPerSF[6];
   int counterUniqueReceivedPackets = 0;

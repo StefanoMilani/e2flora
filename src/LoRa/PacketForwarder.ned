@@ -21,7 +21,11 @@ import inet.applications.contract.IApp;
 simple PacketForwarder like IApp
 {
     @signal[LoRa_GWPacketReceived](type=long); // optional
+    @signal[LoRa_GWDataFrameReceived](type=bool); // optional
+    @signal[LoRa_GWEdgeDataFrameReceived](type=bool); // optional
     @statistic[LoRa_GWPacketReceived](source=LoRa_GWPacketReceived; record=count);
+    @statistic[LoRa_GWDataFrameReceived](source=LoRa_GWDataFrameReceived; record=count);
+    @statistic[LoRa_GWEdgeDataFrameReceived](source=LoRa_GWEdgeDataFrameReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
     string destAddresses = default(""); // list of IP addresses, separated by spaces ("": don't send)
     string localAddress = default("");

@@ -34,6 +34,10 @@ void NetworkServerApp::initialize(int stage) {
   if (stage == 0) {
     ASSERT(recvdPackets.size() == 0);
     LoRa_ServerPacketReceived = registerSignal("LoRa_ServerPacketReceived");
+    LoRa_ServerDataFrameReceived =
+        registerSignal("LoRa_ServerDataFrameReceived");
+    LoRa_ServerAggregateDataFrameReceived =
+        registerSignal("LoRa_ServerAggregateDataFrameReceived");
     localPort = par("localPort");
     destPort = par("destPort");
     adrMethod = par("adrMethod").stdstringValue();
@@ -61,10 +65,12 @@ void NetworkServerApp::startUDP() {
 
 void NetworkServerApp::AS_processDataFrame() {
   AS_counterOfDataFrameReceived++;
+  emit(LoRa_ServerDataFrameReceived, true);
 }
 
 void NetworkServerApp::AS_processEdgeDataAggr() {
   AS_counterOfEdgeDataAggrReceived++;
+  emit(LoRa_ServerAggregateDataFrameReceived, true);
 }
 
 void NetworkServerApp::handleMessage(cMessage* msg) {

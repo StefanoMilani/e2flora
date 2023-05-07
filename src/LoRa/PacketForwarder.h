@@ -55,6 +55,8 @@ class PacketForwarder : public cSimpleModule, public cListener {
 
  public:
   simsignal_t LoRa_GWPacketReceived;
+  simsignal_t LoRa_GWDataFrameReceived;
+  simsignal_t LoRa_GWEdgeDataFrameReceived;
   int counterOfSentPacketsFromNodes = 0;
   int counterOfReceivedPackets = 0;
 

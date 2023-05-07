@@ -29,6 +29,9 @@ Define_Module(PacketForwarder);
 void PacketForwarder::initialize(int stage) {
   if (stage == 0) {
     LoRa_GWPacketReceived = registerSignal("LoRa_GWPacketReceived");
+    LoRa_GWDataFrameReceived = registerSignal("LoRa_GWDataFrameReceived");
+    LoRa_GWEdgeDataFrameReceived =
+        registerSignal("LoRa_GWEdgeDataFrameReceived");
     localPort = par("localPort");
     destPort = par("destPort");
     // Legacy Settings
@@ -81,6 +84,7 @@ void PacketForwarder::handleMessage(cMessage* msg) {
     if (strcmp(gwProtocolType, "edge") == 0 &&
         strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
       EV << "Received an EdgeDataFrame... Doing Nothing" << endl;
+      emit(LoRa_GWEdgeDataFrameReceived, true);
       if (++counterOfEdgeDataFrameReceived % 2 == 0) {
         cMessage* aggrMessage = msg->dup();
         aggrMessage->setName("AggregateEdgeDataFrame");
@@ -97,6 +101,11 @@ void PacketForwarder::handleMessage(cMessage* msg) {
       return;
     }
     EV << "Received a DataFrame... Forwarding it to NS" << endl;
+    if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
+      emit(LoRa_GWEdgeDataFrameReceived, true);
+    } else {
+      emit(LoRa_GWDataFrameReceived, true);
+    }
     auto pkt = check_and_cast<Packet*>(msg);
     const auto& frame = pkt->peekAtFront<LoRaMacFrame>();
     if (frame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS)
