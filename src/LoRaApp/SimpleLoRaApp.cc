@@ -272,11 +272,8 @@ void SimpleLoRaApp::sendJoinRequest(char* msgType) {
     }
   }
   emit(LoRa_AppPacketSent, getSF());
-  EV << "######################## msgType: " << msgType << endl;
   if (strcmp(msgType, "EdgeDataFrame") == 0) {
-    EV << "EDGE MESSAGE!!!!" << endl;
     emit(LoRa_EdgeDataFrameSent, true);
-    EV << "LoRa_EdgeDataFrameSent signal emitted" << endl;
   }
   if (strcmp(msgType, "DataFrame") == 0) {
     emit(LoRa_DataFrameSent, true);

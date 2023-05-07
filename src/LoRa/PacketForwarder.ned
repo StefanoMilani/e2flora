@@ -31,6 +31,7 @@ simple PacketForwarder like IApp
     string localAddress = default("");
     int destPort;
     string gwProtocolType = default("legacy");
+    int edgeFrameToAggregate = default(2); // Set to 0 to not aggregate
 
     gates:
         output socketOut @labels(UdpControlInfo/up);

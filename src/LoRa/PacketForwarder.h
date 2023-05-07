@@ -38,6 +38,7 @@ class PacketForwarder : public cSimpleModule, public cListener {
 
   // Edge Support
   const char* gwProtocolType;
+  int edgeFrameToAggregate;
 
  protected:
   virtual void initialize(int stage) override;

@@ -81,7 +81,6 @@ void NetworkServerApp::handleMessage(cMessage* msg) {
       throw cRuntimeError("Header error type");
     // LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
     const char* lorawanMsgType = msg->getFullName();
-    EV << "######## LoRa_ServerPacketReceived " << lorawanMsgType << endl;
     if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
       // MANAGE EDGE DATA FRAME!!!!!
     } else if (strcmp(lorawanMsgType, "AggregateEdgeDataFrame") == 0) {

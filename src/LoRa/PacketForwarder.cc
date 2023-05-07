@@ -36,6 +36,7 @@ void PacketForwarder::initialize(int stage) {
     destPort = par("destPort");
     // Legacy Settings
     gwProtocolType = par("gwProtocolType");
+    edgeFrameToAggregate = par("edgeFrameToAggregate");
   } else if (stage == INITSTAGE_APPLICATION_LAYER) {
     startUDP();
     getSimulation()->getSystemModule()->subscribe("LoRa_AppPacketSent", this);
@@ -76,23 +77,16 @@ void PacketForwarder::startUDP() {
 void PacketForwarder::handleMessage(cMessage* msg) {
   EV << msg->getArrivalGate() << endl;
   if (msg->arrivedOn("lowerLayerIn")) {
-    EV << "Received LoRaMAC frame" << endl;
     const char* lorawanMsgType = msg->getFullName();
     /*
      *  Check if GW is legacy and the msg type received
      */
     if (strcmp(gwProtocolType, "edge") == 0 &&
         strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
-      EV << "Received an EdgeDataFrame... Doing Nothing" << endl;
       emit(LoRa_GWEdgeDataFrameReceived, true);
-      if (++counterOfEdgeDataFrameReceived % 2 == 0) {
+      if (++counterOfEdgeDataFrameReceived % edgeFrameToAggregate == 0) {
         cMessage* aggrMessage = msg->dup();
         aggrMessage->setName("AggregateEdgeDataFrame");
-        EV << "################# Aggregate EdgeDataFrame... Sending it to AS"
-           << endl;
-
-        // send(aggrMessage, "socketOut");
-
         auto pkt = check_and_cast<Packet*>(aggrMessage);
         const auto& frame = pkt->peekAtFront<LoRaMacFrame>();
         processLoraMACPacket(pkt);
@@ -100,7 +94,6 @@ void PacketForwarder::handleMessage(cMessage* msg) {
       delete msg;
       return;
     }
-    EV << "Received a DataFrame... Forwarding it to NS" << endl;
     if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
       emit(LoRa_GWEdgeDataFrameReceived, true);
     } else {
