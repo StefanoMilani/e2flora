@@ -24,9 +24,9 @@ Define_Module(SimpleLoRaApp);
 
 void SimpleLoRaApp::initialize(int stage) {
   cSimpleModule::initialize(stage);
+  cModule* host = getContainingNode(this);
   if (stage == INITSTAGE_LOCAL) {
     std::pair<double, double> coordsValues = std::make_pair(-1, -1);
-    cModule* host = getContainingNode(this);
     // Generate random location for nodes if circle deployment type
     if (strcmp(host->par("deploymentType").stringValue(), "circle") == 0) {
       coordsValues = generateUniformCircleCoordinates(
@@ -56,7 +56,17 @@ void SimpleLoRaApp::initialize(int stage) {
     // timeToFirstPacket = par("timeToFirstPacket");
 
     // Legacy Device Flag
-    deviceProtocolType = par("deviceProtocolType");
+    EV << "########################Node:  " << host->getIndex() << endl;
+    if (strcmp(par("deviceProtocolType"), "rand") == 0) {
+      if (host->getIndex() % 2 == 0) {
+        deviceProtocolType = "edge";
+      } else {
+        deviceProtocolType = "legacy";
+      }
+
+    } else {
+      deviceProtocolType = par("deviceProtocolType");
+    }
     if (strcmp(deviceProtocolType, "edge") == 0) {
       sendMeasurementsEdge = new cMessage("sendMeasurementsEdge");
       scheduleAt(simTime() + timeToFirstPacket, sendMeasurementsEdge);
