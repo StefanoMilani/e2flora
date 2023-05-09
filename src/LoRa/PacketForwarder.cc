@@ -81,9 +81,14 @@ void PacketForwarder::handleMessage(cMessage* msg) {
     /*
      *  Check if GW is legacy and the msg type received
      */
+    if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
+      emit(LoRa_GWEdgeDataFrameReceived, true);
+    } else {
+      emit(LoRa_GWDataFrameReceived, true);
+    }
     if (strcmp(gwProtocolType, "edge") == 0 &&
         strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
-      emit(LoRa_GWEdgeDataFrameReceived, true);
+      // emit(LoRa_GWEdgeDataFrameReceived, true);
       if (++counterOfEdgeDataFrameReceived % edgeFrameToAggregate == 0) {
         cMessage* aggrMessage = msg->dup();
         aggrMessage->setName("AggregateEdgeDataFrame");
@@ -93,11 +98,6 @@ void PacketForwarder::handleMessage(cMessage* msg) {
       }
       delete msg;
       return;
-    }
-    if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
-      emit(LoRa_GWEdgeDataFrameReceived, true);
-    } else {
-      emit(LoRa_GWDataFrameReceived, true);
     }
     auto pkt = check_and_cast<Packet*>(msg);
     const auto& frame = pkt->peekAtFront<LoRaMacFrame>();
