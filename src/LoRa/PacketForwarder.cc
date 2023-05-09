@@ -78,17 +78,18 @@ void PacketForwarder::handleMessage(cMessage* msg) {
   EV << msg->getArrivalGate() << endl;
   if (msg->arrivedOn("lowerLayerIn")) {
     const char* lorawanMsgType = msg->getFullName();
+    long msgType = strtol(lorawanMsgType, nullptr, 10);
     /*
      *  Check if GW is legacy and the msg type received
      */
-    if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
-      emit(LoRa_GWEdgeDataFrameReceived, true);
+    // if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
+    if (msgType % 2 == 0) {
+      emit(LoRa_GWEdgeDataFrameReceived, msgType);
     } else {
-      emit(LoRa_GWDataFrameReceived, true);
+      emit(LoRa_GWDataFrameReceived, msgType);
     }
-    if (strcmp(gwProtocolType, "edge") == 0 &&
-        strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
-      // emit(LoRa_GWEdgeDataFrameReceived, true);
+    if (strcmp(gwProtocolType, "edge") == 0 && msgType % 2 == 0) {
+      // strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
       if (++counterOfEdgeDataFrameReceived % edgeFrameToAggregate == 0) {
         cMessage* aggrMessage = msg->dup();
         aggrMessage->setName("AggregateEdgeDataFrame");

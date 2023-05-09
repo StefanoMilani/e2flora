@@ -56,7 +56,6 @@ void SimpleLoRaApp::initialize(int stage) {
     // timeToFirstPacket = par("timeToFirstPacket");
 
     // Legacy Device Flag
-    EV << "########################Node:  " << host->getIndex() << endl;
     if (strcmp(par("deviceProtocolType"), "rand") == 0) {
       if (host->getIndex() % 2 == 0) {
         deviceProtocolType = "edge";
@@ -142,12 +141,19 @@ void SimpleLoRaApp::handleMessage(cMessage* msg) {
   if (msg->isSelfMessage()) {
     if (msg == sendMeasurements || msg == sendMeasurementsEdge) {
       bool edgeFrame;
+      int msgId = (int)msg->getId();
+      msgId = msgId * 2;
+      std::stringstream ss;
       if (strcmp(msg->getFullName(), "sendMeasurementsEdge") == 0) {
-        sendJoinRequest((char*)"EdgeDataFrame");
+        ss << msgId;
+        char* msgType = (char*)ss.str().c_str();
+        sendJoinRequest(msgType);
         edgeFrame = true;
       } else {
         // Legacy frame
-        sendJoinRequest((char*)"DataFrame");
+        ss << ++msgId;
+        char* msgType = (char*)ss.str().c_str();
+        sendJoinRequest(msgType);
         edgeFrame = false;
       }
 

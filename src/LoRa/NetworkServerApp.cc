@@ -81,12 +81,16 @@ void NetworkServerApp::handleMessage(cMessage* msg) {
       throw cRuntimeError("Header error type");
     // LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
     const char* lorawanMsgType = msg->getFullName();
-    if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
-      // MANAGE EDGE DATA FRAME!!!!!
-    } else if (strcmp(lorawanMsgType, "AggregateEdgeDataFrame") == 0) {
+    if (strcmp(lorawanMsgType, "AggregateEdgeDataFrame") == 0) {
       AS_processEdgeDataAggr();
-    } else if (strcmp(lorawanMsgType, "DataFrame") == 0) {
-      AS_processDataFrame();
+    } else {
+      long msgType = strtol(lorawanMsgType, nullptr, 10);
+      // if (strcmp(lorawanMsgType, "EdgeDataFrame") == 0) {
+      if (msgType % 2 == 0) {
+        // MANAGE EDGE DATA FRAME!!!!!
+      } else {
+        AS_processDataFrame();
+      }
     }
     if (simTime() >= getSimulation()->getWarmupPeriod()) {
       totalReceivedPackets++;
