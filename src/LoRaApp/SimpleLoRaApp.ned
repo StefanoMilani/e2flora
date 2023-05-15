@@ -24,7 +24,12 @@ simple SimpleLoRaApp like IApp
 {
     parameters:
         @signal[LoRa_AppPacketSent](type=long); // optional
+        @signal[LoRa_DataFrameSent](type=bool); // optional
+        @signal[LoRa_EdgeDataFrameSent](type=bool); // optional
         @statistic[LoRa_AppPacketSent](source=LoRa_AppPacketSent; record=count);
+        @statistic[LoRa_DataFrameSent](source=LoRa_DataFrameSent; record=count);
+        @statistic[LoRa_EdgeDataFrameSent](source=LoRa_EdgeDataFrameSent; record=count);
+        @display("i=block/routing");
         int numberOfPacketsToSend = default(1);
         volatile double timeToFirstPacket @unit(s) = default(10s);
         volatile double timeToNextPacket @unit(s) = default(10s);
@@ -36,6 +41,7 @@ simple SimpleLoRaApp like IApp
         bool initialUseHeader = default(true);
         bool evaluateADRinNode = default(false);
         int dataSize @unit(B) = default(10B);
+        string deviceProtocolType = default("rand");
     gates:
         input socketIn @labels(LoRaAppPacket/up);
         output socketOut @labels(LoRaAppPacket/down);        

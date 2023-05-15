@@ -19,7 +19,11 @@ import inet.applications.contract.IApp;
 simple NetworkServerApp like IApp
 {
     @signal[LoRa_ServerPacketReceived](type=bool); // optional
+    @signal[LoRa_ServerDataFrameReceived](type=bool); // optional
+    @signal[LoRa_ServerAggregateDataFrameReceived](type=bool); // optional
     @statistic[LoRa_ServerPacketReceived](source=LoRa_ServerPacketReceived; record=count);
+    @statistic[LoRa_ServerDataFrameReceived](source=LoRa_ServerDataFrameReceived; record=count);
+    @statistic[LoRa_ServerAggregateDataFrameReceived](source=LoRa_ServerAggregateDataFrameReceived; record=count);
     int localPort = default(-1);  // local port (-1: use ephemeral port)
     string localAddress = default("");
     int destPort = default(-1);

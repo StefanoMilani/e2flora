@@ -17,88 +17,102 @@
 #define __LORANETWORK_NETWORKSERVERAPP_H_
 
 #include <omnetpp.h>
-#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
-#include <vector>
-#include <tuple>
 #include <algorithm>
+#include <tuple>
+#include <vector>
 #include "inet/common/INETDefs.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 
+#include <list>
+#include "../LoRaApp/LoRaAppPacket_m.h"
 #include "LoRaMacControlInfo_m.h"
 #include "LoRaMacFrame_m.h"
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "../LoRaApp/LoRaAppPacket_m.h"
-#include <list>
 
 namespace flora {
 
-class knownNode
-{
-public:
-    MacAddress srcAddr;
-    int framesFromLastADRCommand;
-    int lastSeqNoProcessed;
-    int numberOfSentADRPackets;
-    std::list<double> adrListSNIR;
-    cOutVector *historyAllSNIR;
-    cOutVector *historyAllRSSI;
-    cOutVector *receivedSeqNumber;
-    cOutVector *calculatedSNRmargin;
+class knownNode {
+ public:
+  MacAddress srcAddr;
+  int framesFromLastADRCommand;
+  int lastSeqNoProcessed;
+  int numberOfSentADRPackets;
+  std::list<double> adrListSNIR;
+  cOutVector* historyAllSNIR;
+  cOutVector* historyAllRSSI;
+  cOutVector* receivedSeqNumber;
+  cOutVector* calculatedSNRmargin;
 };
 
-class knownGW
-{
-public:
-    L3Address ipAddr;
+class knownGW {
+ public:
+  L3Address ipAddr;
 };
 
-class receivedPacket
-{
-public:
-    Packet* rcvdPacket = nullptr;
-    cMessage* endOfWaiting = nullptr;
-    std::vector<std::tuple<L3Address, double, double>> possibleGateways; // <address, sinr, rssi>
+class receivedPacket {
+ public:
+  Packet* rcvdPacket = nullptr;
+  cMessage* endOfWaiting = nullptr;
+  std::vector<std::tuple<L3Address, double, double>>
+      possibleGateways;  // <address, sinr, rssi>
 };
 
-class NetworkServerApp : public cSimpleModule, cListener
-{
-  protected:
-    std::vector<knownNode> knownNodes;
-    std::vector<knownGW> knownGateways;
-    std::vector<receivedPacket> receivedPackets;
-    int localPort = -1, destPort = -1;
-    std::vector<std::tuple<MacAddress, int>> recvdPackets;
-    // state
-    UdpSocket socket;
-    cMessage *selfMsg = nullptr;
-    int totalReceivedPackets;
-    std::string adrMethod;
-    double adrDeviceMargin;
-    std::map<int, int> numReceivedPerNode;
+class NetworkServerApp : public cSimpleModule, cListener {
+ protected:
+  std::vector<knownNode> knownNodes;
+  std::vector<knownGW> knownGateways;
+  std::vector<receivedPacket> receivedPackets;
+  int localPort = -1, destPort = -1;
+  std::vector<std::tuple<MacAddress, int>> recvdPackets;
+  // state
+  UdpSocket socket;
+  cMessage* selfMsg = nullptr;
+  int totalReceivedPackets;
+  std::string adrMethod;
+  double adrDeviceMargin;
+  std::map<int, int> numReceivedPerNode;
 
-  protected:
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void finish() override;
-    void processLoraMACPacket(Packet *pk);
-    void startUDP();
-    void setSocketOptions();
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    bool isPacketProcessed(const Ptr<const LoRaMacFrame> &);
-    void updateKnownNodes(Packet* pkt);
-    void addPktToProcessingTable(Packet* pkt);
-    void processScheduledPacket(cMessage* selfMsg);
-    void evaluateADR(Packet *pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW);
-    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
-    bool evaluateADRinServer;
+ protected:
+  virtual void initialize(int stage) override;
+  virtual void handleMessage(cMessage* msg) override;
+  virtual void finish() override;
+  void processLoraMACPacket(Packet* pk);
+  void startUDP();
+  void setSocketOptions();
+  virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+  bool isPacketProcessed(const Ptr<const LoRaMacFrame>&);
+  void updateKnownNodes(Packet* pkt);
+  void addPktToProcessingTable(Packet* pkt);
+  void processScheduledPacket(cMessage* selfMsg);
+  void evaluateADR(Packet* pkt,
+                   L3Address pickedGateway,
+                   double SNIRinGW,
+                   double RSSIinGW);
+  void receiveSignal(cComponent* source,
+                     simsignal_t signalID,
+                     intval_t value,
+                     cObject* details) override;
+  bool evaluateADRinServer;
 
-    cHistogram receivedRSSI;
-  public:
-    simsignal_t LoRa_ServerPacketReceived;
-    int counterOfSentPacketsFromNodes = 0;
-    int counterOfSentPacketsFromNodesPerSF[6];
-    int counterUniqueReceivedPackets = 0;
-    int counterUniqueReceivedPacketsPerSF[6];
+  // EDGE Utilities
+  void AS_processDataFrame();
+  void AS_processEdgeDataAggr();
+
+  cHistogram receivedRSSI;
+
+ public:
+  simsignal_t LoRa_ServerPacketReceived;
+  simsignal_t LoRa_ServerDataFrameReceived;
+  simsignal_t LoRa_ServerAggregateDataFrameReceived;
+  int counterOfSentPacketsFromNodes = 0;
+  int counterOfSentPacketsFromNodesPerSF[6];
+  int counterUniqueReceivedPackets = 0;
+  int counterUniqueReceivedPacketsPerSF[6];
+
+  // EDGE COUNTERS
+  int AS_counterOfDataFrameReceived = 0;
+  int AS_counterOfEdgeDataAggrReceived = 0;
 };
-} //namespace inet
+}  // namespace flora
 #endif
