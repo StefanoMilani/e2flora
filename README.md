@@ -1,12 +1,11 @@
-# FLoRa
-<a href="https://www.buymeacoffee.com/mariuszslabicki" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-red.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+# E2FLoRa
 
-FLoRa (Framework for LoRa) is a simulation framework for carrying out end-to-end simulations for LoRa networks. 
-It is based on the [OMNeT++](https://omnetpp.org/) network simulator and uses components from the [INET framework](https://inet.omnetpp.org/) as well.
+Edge2FLoRa is a simulation framework based for carrying out end-to-end simulations for Edge2LoRa networks.
 
-FLoRa allows the creation of LoRa networks with modules for LoRa nodes, gateway(s) and a network server. 
-Application logic can be deployed as independent modules that are connected with the network server. 
-The network server and nodes support dynamic management of configuration parameters through Adaptive Data Rate (ADR). 
-Finally, the energy consumption statistics are collected in every node.
+It is based on the [FLoRa (Framework for LoRa)](http://flora.aalto.fi/), an [OMNeT++](https://omnetpp.org/) network simulator module for standard LoRa & LoRaWAN Networks. Moreover , it uses components from the [INET framework](https://inet.omnetpp.org/) as well.
 
-More information here: [flora.aalto.fi](http://flora.aalto.fi/)
+More information here:
+
+- [FLoRa](http://flora.aalto.fi/)
+- [INET Framework](https://inet.omnetpp.org/)
+- [OMNeT++](https://omnetpp.org/)
